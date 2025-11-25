@@ -1,0 +1,2 @@
+transaction_id,timestamp,sender_vpa,amount_inr,location,app_used,is_fraud_flag,risk_score,flag_reason
+TXN17640794756991,2025-11-25T19:34:35.699177,rohit191@ybl,69510,Mewat,GooglePay,1,80,High Risk Location (Mewat); High Transaction Amount
