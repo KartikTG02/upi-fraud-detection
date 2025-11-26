@@ -8,7 +8,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)
 
 ## 📌 Project Overview
-This project is an end-to-end **Real-Time Data Engineering Pipeline** designed to detect fraudulent UPI transactions. It processes transaction streams, identifies suspicious patterns (High-Value or High-Velocity), and visualizes the data on a live dashboard.
+This project is an end-to-end pipeline designed to detect fraudulent UPI transactions. It processes transaction streams, identifies suspicious patterns (High-Value or High-Velocity), and visualizes the data on a live dashboard.
 
 It simulates a real-world FinTech environment where speed and data integrity are critical.
 
@@ -23,3 +23,4 @@ graph LR
     D --Response--> C
     C -->|Flag & Store| E[(PostgreSQL DB)]
     E -->|Poll Data| F[Streamlit Dashboard]
+
