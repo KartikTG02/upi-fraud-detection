@@ -16,15 +16,14 @@ Unlike traditional rule-based systems, this engine uses **Apache Spark Structure
 
 ```mermaid
 graph LR
-    A[Traffic Generator] -->|JSON Stream| B(Apache Kafka)
-    B -->|Ingest| C[Spark Master / Workers]
+    A[Kafka Stream] --> B(Apache Spark)
     
-    subgraph "Distributed Processing Layer"
-    C -->|Watermarking & Windows| C
-    C -->|Check State| D[(Redis)]
+    subgraph "Spark Processing"
+    B -->|Calculate Z-Scores| B
     end
     
-    C -->|Anomalies| E[(PostgreSQL)]
-    C -->|All Data| F[Parquet Data Lake]
-    E -->|Poll| G[Streamlit Dashboard]
+    B -->|Path 1: Cold Storage| C[Parquet Data Lake]
+    B -->|Path 2: Hot Storage| D[(Postgres DB)]
+    D -->|Visualize| E[Streamlit Dashboard]
+
 
