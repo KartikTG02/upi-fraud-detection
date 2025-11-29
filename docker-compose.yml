@@ -1,8 +1,5 @@
-version: '3.8'
-
 services:
   # --- SERVICE 1: Zookeeper ---
-  # The "Manager" for Kafka. It keeps track of status.
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
@@ -13,26 +10,27 @@ services:
       - "2181:2181"
 
   # --- SERVICE 2: Kafka ---
-  # The "Conveyor Belt".
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: kafka
     depends_on:
-      - zookeeper # Kafka won't start until Zookeeper is ready
+      - zookeeper
     ports:
       - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # IMPORTANT: This tells external programs (like your Python script) how to connect.
-      # We are saying: "If you are outside Docker (localhost), talk to me on port 9092."
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   # --- SERVICE 3: Redis ---
-  # The "Whiteboard" (Cache).
   redis:
     image: redis:alpine
     container_name: fraud_detection_redis
@@ -40,7 +38,6 @@ services:
       - "6379:6379"
 
   # --- SERVICE 4: PostgreSQL ---
-  # The "Filing Cabinet" (Storage).
   db:
     image: postgres:15-alpine
     container_name: fraud_detection_db
@@ -52,6 +49,38 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+  
+  # --- SPARK MASTER ---
+  spark-master:
+    image: bitnamilegacy/spark:3.5.3
+    container_name: spark-master
+    volumes:
+      - ./:/app
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+
+  # --- SPARK WORKER ---
+  spark-worker:
+    image: bitnamilegacy/spark:3.5.3
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    depends_on:
+      - spark-master
 
 volumes:
   pgdata:

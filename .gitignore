@@ -79,6 +79,10 @@ docs/_build/
 .pybuilder/
 target/
 
+# Directory Shit
+data_lake
+checkpoints
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
