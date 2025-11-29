@@ -26,4 +26,7 @@ graph LR
     B -->|Path 2: Hot Storage| D[(Postgres DB)]
     D -->|Visualize| E[Streamlit Dashboard]
 
+```
+## Dashboard Preview
+<img width="1087" height="748" alt="image" src="https://github.com/user-attachments/assets/86101c61-53b2-4f36-b3c6-7ba5b229aa59" />
 
