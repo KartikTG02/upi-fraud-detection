@@ -1,26 +1,29 @@
-# 🛡️ Real-Time UPI Transaction Fraud Detection System
+# 🛡️ Distributed Real-Time Fraud Detection System
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![Spark](https://img.shields.io/badge/Apache%20Spark-Distributed-orange)
 ![Kafka](https://img.shields.io/badge/Apache%20Kafka-Streaming-black)
 ![Redis](https://img.shields.io/badge/Redis-Caching-red)
 ![Postgres](https://img.shields.io/badge/PostgreSQL-Storage-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-ff4b4b)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)
+![Docker](https://img.shields.io/badge/Docker-Microservices-2496ED)
+![Parquet](https://img.shields.io/badge/Parquet-Data%20Lake-green)
 
 ## 📌 Project Overview
-This project is an end-to-end pipeline designed to detect fraudulent UPI transactions. It processes transaction streams, identifies suspicious patterns (High-Value or High-Velocity), and visualizes the data on a live dashboard.
+This project is an **Event-Driven Big Data Pipeline** designed to detect financial fraud in high-throughput UPI transaction streams. 
 
-It simulates a real-world FinTech environment where speed and data integrity are critical.
+Unlike traditional rule-based systems, this engine uses **Apache Spark Structured Streaming** to perform stateful, windowed aggregations in real-time. It calculates **Z-Scores** (Standard Deviation) to detect statistical anomalies and persists data into a **Partitioned Data Lake** for historical analysis.
 
 ## 🏗️ System Architecture
-The system follows a microservices-style architecture, fully containerized using Docker.
 
 ```mermaid
 graph LR
-    A[Transaction Generator] -->|JSON Stream| B(Apache Kafka)
-    B -->|Subscribe| C[Fraud Engine / Consumer]
-    C -->|Check Velocity| D[(Redis Cache)]
-    D --Response--> C
-    C -->|Flag & Store| E[(PostgreSQL DB)]
-    E -->|Poll Data| F[Streamlit Dashboard]
-
+    A[Traffic Generator] -->|JSON Stream| B(Apache Kafka)
+    B -->|Ingest| C[Spark Master / Workers]
+    
+    subgraph "Distributed Processing Layer"
+    C -->|Watermarking & Windows| C
+    C -->|Check State| D[(Redis)]
+    end
+    
+    C -->|Anomalies| E[(PostgreSQL)]
+    C -->|All Data| F[Parquet Data Lake]
+    E -->|Poll| G[Streamlit Dashboard]
